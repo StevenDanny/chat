@@ -1,4 +1,3 @@
-const { Socket } = require("dgram");
 const express = require("express");
 const http = require("http");
 const path = require("path");
@@ -10,6 +9,7 @@ const {
   getRoomUsers,
   userLeave,
 } = require("./utils/users");
+const getComites = require("./backend/comite");
 
 const app = express();
 const server = http.createServer(app);
@@ -18,6 +18,13 @@ const io = socketio(server);
 app.use(express.static(path.join(__dirname, "public")));
 
 io.on("connection", (socket) => {
+  socket.on("comites", async () => {
+    let comites = [];
+    comites = await getComites();
+    console.log(comites);
+    socket.emit("comitesUsuario", comites);
+  });
+
   socket.on("joinRoom", ({ username, room }) => {
     const user = userJoin(socket.id, username, room);
     socket.join(user.room);
@@ -40,9 +47,10 @@ io.on("connection", (socket) => {
     });
   });
 
-  socket.on("chatMessage", (msg) => {
+  socket.on("chatMessage", async (msg) => {
     const user = getCurrentUser(socket.id);
-    io.to(user.room).emit("message", formatMessage(user.username, msg));
+    const data = formatMessage(user.username, msg);
+    io.to(user.room).emit("message", data);
   });
 
   socket.on("disconnect", () => {

@@ -12,7 +12,7 @@ const socket = io();
 socket.emit("joinRoom", { username, room });
 
 socket.on("message", (message) => {
-  console.log(message);
+  console.log("haeosuhasoe");
   outputMessage(message.username, message.text, message.time);
   chatMessage.scrollTop = chatMessage.scrollHeight;
 });
